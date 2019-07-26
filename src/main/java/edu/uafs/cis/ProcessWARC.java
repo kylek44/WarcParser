@@ -15,7 +15,7 @@
 //    private static Pattern httpStartPattern = Pattern.compile("^[hH][tT][tT][pP][sS]?:?//?.*");
 //
 //    public static void main(String[] args) throws IOException {
-//        String inputWarcFile = "dataset1.little.warc";
+//        String inputWarcFile = "dataset1.little1.warc";
 ////        GZIPInputStream gzipInputStream = new GZIPInputStream(new FileInputStream(inputWarcFile));
 //        DataInputStream dataInputStream = new DataInputStream(new FileInputStream(inputWarcFile));
 //        WarcRecord currentWarcRecord;
