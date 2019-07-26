@@ -85,7 +85,7 @@ public class WarcProcessDelete {
     private static int getDirectoryIndex(String fileName) {
         StringBuilder numbers = new StringBuilder();
 
-        for (int i = 15; i < fileName.length(); i++) {
+        for (int i = 7; i < fileName.length(); i++) {
             if (Character.isDigit(fileName.charAt(i))) {
                 numbers.append(fileName.charAt(i));
             } else {
