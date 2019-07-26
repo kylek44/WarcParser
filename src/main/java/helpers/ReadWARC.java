@@ -14,7 +14,7 @@
 //        // use a callback class for handling WARC record data:
 //        IProcessWarcRecord processor = new SampleProcessWarcRecord();
 //
-//        String inputWarcFile="dataset1.small.warc.gz";
+//        String inputWarcFile="dataset1.little3.warc.gz";
 //        GZIPInputStream gzInputStream=new GZIPInputStream(new FileInputStream(inputWarcFile));
 //        DataInputStream inStream=new DataInputStream(gzInputStream);
 //

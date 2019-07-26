@@ -7,12 +7,12 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.zip.GZIPInputStream;
 
 public class WarcProcessDelete {
 
     private static final String SAVE_STRING = "%04d-%08d.html";
     private static final String DIRECTORY_STRING = "%04d-warc";
-    private static final String FILE_INDEX_STRING = "%08d.html";
     private static Pattern httpStartPattern = Pattern.compile("^[hH][tT][tT][pP][sS]?:?//?.*");
 
     public static void main(String[] args) {
@@ -42,10 +42,14 @@ public class WarcProcessDelete {
                     System.exit(1);
                 }
 
-                for (File file : files) {
+                for (int i = 0; i < files.length; i++) {
                     try {
-                        dataInputStream = new DataInputStream(new FileInputStream(file));
-                        directoryIndex = getDirectoryIndex(file.getName());
+                        if (GZipUtil.isGZipped(files[i])) {
+                            dataInputStream = new DataInputStream(new GZIPInputStream(new FileInputStream(files[i])));
+                        } else {
+                            dataInputStream = new DataInputStream(new FileInputStream(files[i]));
+                        }
+                        directoryIndex = getDirectoryIndex(files[i].getName());
                         new File(outDirectory + String.format(DIRECTORY_STRING, directoryIndex)).mkdirs();
 
                         while ((warcRecord = WarcRecord.readNextWarcRecord(dataInputStream)) != null) {
@@ -54,12 +58,14 @@ public class WarcProcessDelete {
                                 targetUri = htmlResponseRecord.getTargetURI();
                                 recordContent = htmlResponseRecord.getRawRecord().getContentUTF8();
                                 saveHtml(recordContent, outDirectory, directoryIndex, fileIndex);
-                                urls.write(String.format("%s,%s,%s\n", targetUri, String.format(DIRECTORY_STRING, directoryIndex), String.format(SAVE_STRING, directoryIndex, fileIndex)));
+                                urls.write(String.format("%s\t%s\t%s\n", targetUri, String.format(DIRECTORY_STRING, directoryIndex), String.format(SAVE_STRING, directoryIndex, fileIndex)));
                                 fileIndex++;
                             }
                         }
+
+                        files[i].delete();
                     } catch (IOException e) {
-                        logs.printf("Error processing file: %s\n", file.getAbsolutePath());
+                        logs.printf("Error processing file: %s\n", files[i].getAbsolutePath());
                         e.printStackTrace();
                     }
                 }
@@ -71,6 +77,7 @@ public class WarcProcessDelete {
                 e.printStackTrace();
             } catch (NumberFormatException e) {
                 System.out.println("Index starts must be integers");
+                e.printStackTrace();
             }
         }
     }
