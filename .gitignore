@@ -1,1 +1,4 @@
-./input
+/input/**
+/done/**
+*.warc
+*.gz
