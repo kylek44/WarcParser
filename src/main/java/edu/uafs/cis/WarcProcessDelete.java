@@ -16,10 +16,11 @@ public class WarcProcessDelete {
     private static Pattern httpStartPattern = Pattern.compile("^[hH][tT][tT][pP][sS]?:?//?.*");
 
     public static void main(String[] args) {
-        if (args.length < 3) {
+        if (args.length < 4) {
             System.out.println("First arg: Directory containing WARC files to process");
             System.out.println("Second arg: Directory name to place processed files");
-            System.out.println("Third arg: Index number for file start");
+            System.out.println("Third arg: Index number for directory start");
+            System.out.println("Fourth arg: Index number for file start");
         } else {
             try {
                 File[] files = new File(args[0]).listFiles();
@@ -30,8 +31,8 @@ public class WarcProcessDelete {
                 WarcHTMLResponseRecord htmlResponseRecord;
                 String targetUri;
                 String recordContent;
-                int directoryIndex;
-                long fileIndex = Long.parseLong(args[2]);
+                int directoryIndex = Integer.parseInt(args[2]);
+                long fileIndex = Long.parseLong(args[3]);
 
                 new File(outDirectory).mkdirs();
                 PrintWriter logs = new PrintWriter(new FileWriter(outDirectory + "errors.log"));
@@ -49,7 +50,7 @@ public class WarcProcessDelete {
                         } else {
                             dataInputStream = new DataInputStream(new FileInputStream(files[i]));
                         }
-                        directoryIndex = getDirectoryIndex(files[i].getName());
+
                         new File(outDirectory + String.format(DIRECTORY_STRING, directoryIndex)).mkdirs();
 
                         while ((warcRecord = WarcRecord.readNextWarcRecord(dataInputStream)) != null) {
@@ -63,6 +64,7 @@ public class WarcProcessDelete {
                             }
                         }
 
+                        directoryIndex++;
                         files[i].delete();
                     } catch (IOException e) {
                         logs.printf("Error processing file: %s\n", files[i].getAbsolutePath());
@@ -82,20 +84,6 @@ public class WarcProcessDelete {
         }
     }
 
-    private static int getDirectoryIndex(String fileName) {
-        StringBuilder numbers = new StringBuilder();
-
-        for (int i = 7; i < fileName.length(); i++) {
-            if (Character.isDigit(fileName.charAt(i))) {
-                numbers.append(fileName.charAt(i));
-            } else {
-                break;
-            }
-        }
-
-        return Integer.parseInt(numbers.toString());
-    }
-
     private static void saveHtml(String content, String outDirectory, int directoryIndex, long fileIndex) throws IOException {
         BufferedReader in = new BufferedReader(new StringReader(content));
         BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outDirectory + String.format(DIRECTORY_STRING + "/", directoryIndex) + String.format(SAVE_STRING, directoryIndex, fileIndex)), StandardCharsets.UTF_8));
@@ -103,7 +91,6 @@ public class WarcProcessDelete {
         boolean foundEndHttpHeader = false;
         boolean foundStartHtml = false;
         String line;
-//        String fullPath = new File().getAbsolutePath()
 
         while ((line = in.readLine()) != null && !foundStartHttpHeader) {
             Matcher matcher = httpStartPattern.matcher(line);
