@@ -64,6 +64,7 @@ public class WarcProcessDelete {
                             }
                         }
 
+                        dataInputStream.close();
                         directoryIndex++;
                         files[i].delete();
                     } catch (IOException e) {
